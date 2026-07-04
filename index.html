@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Diário de Trading</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root{
+    --bg:#000000;
+    --panel:#121212;
+    --panel-2:#1b1b1b;
+    --border:#3a3a3a;
+    --text:#e8e8e8;
+    --text-muted:#8f8f8f;
+    --green:#26a65b;
+    --green-dim:rgba(38,166,91,.16);
+    --red:#e2434f;
+    --red-dim:rgba(226,67,79,.16);
+    --amber:#e2434f;
+    --amber-dim:rgba(226,67,79,.14);
+    --select:#a8a8a8;
+    --select-dim:rgba(168,168,168,.14);
+    --radius:14px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    position:relative;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:40px;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    opacity:.07;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='260'%3E%3Crect x='18' y='60' width='7' height='42' fill='%2326a65b'/%3E%3Cline x1='21.5' y1='45' x2='21.5' y2='112' stroke='%2326a65b' stroke-width='1'/%3E%3Crect x='52' y='90' width='7' height='30' fill='%23e2434f'/%3E%3Cline x1='55.5' y1='78' x2='55.5' y2='130' stroke='%23e2434f' stroke-width='1'/%3E%3Crect x='86' y='50' width='7' height='55' fill='%2326a65b'/%3E%3Cline x1='89.5' y1='36' x2='89.5' y2='115' stroke='%2326a65b' stroke-width='1'/%3E%3Crect x='120' y='105' width='7' height='28' fill='%23e2434f'/%3E%3Cline x1='123.5' y1='92' x2='123.5' y2='143' stroke='%23e2434f' stroke-width='1'/%3E%3Crect x='154' y='68' width='7' height='46' fill='%2326a65b'/%3E%3Cline x1='157.5' y1='54' x2='157.5' y2='124' stroke='%2326a65b' stroke-width='1'/%3E%3Crect x='188' y='115' width='7' height='24' fill='%23e2434f'/%3E%3Cline x1='191.5' y1='102' x2='191.5' y2='148' stroke='%23e2434f' stroke-width='1'/%3E%3Cpath d='M10 170 Q 60 150 105 172 T 210 165' stroke='%238f8f8f' stroke-width='1.2' fill='none'/%3E%3Cpath d='M10 200 Q 70 220 120 195 T 210 210' stroke='%238f8f8f' stroke-width='1' fill='none' opacity='.6'/%3E%3C/svg%3E");
+    background-repeat:repeat;
+    background-size:220px 260px;
+  }
+  header, nav, main{position:relative; z-index:1;}
+
+  .bg-deco{
+    position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+  }
+  .bg-bull{
+    position:absolute; bottom:-30px; left:-30px;
+    width:260px; height:auto;
+    opacity:.06;
+  }
+  .bg-dollar{
+    position:absolute; top:40px; right:-20px;
+    width:170px; height:auto;
+    opacity:.05;
+  }
+  @media (max-width:480px){
+    .bg-bull{width:190px;}
+    .bg-dollar{width:120px;}
+  }
+
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif; margin:0;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* ---------- Header ---------- */
+  header{
+    position:relative;
+    overflow:hidden;
+    padding:22px 18px 14px;
+    max-width:640px;
+    margin:0 auto;
+  }
+  .header-chart{
+    position:absolute;
+    top:-6px; left:-4%; right:-4%;
+    height:100px;
+    opacity:.16;
+    z-index:0;
+    pointer-events:none;
+  }
+  .header-chart svg{width:100%; height:100%; display:block;}
+  .brand{
+    position:relative; z-index:1;
+    display:flex; align-items:center; gap:10px;
+  }
+  .brand .dot{
+    width:10px;height:10px;border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 12px var(--green);
+    flex-shrink:0;
+  }
+  .brand h1{font-size:20px; letter-spacing:.2px;}
+  .brand span{color:var(--text-muted); font-size:13px; display:block; margin-top:2px;}
+
+  nav{
+    max-width:640px; margin:16px auto 0; padding:0 18px;
+    display:flex; gap:8px;
+  }
+
+  .ticker-bar{
+    max-width:640px; margin:14px auto 0; padding:7px 0;
+    border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+    overflow:hidden;
+    position:relative; z-index:1;
+  }
+  .ticker-track{
+    display:flex; gap:26px; white-space:nowrap; width:max-content;
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.5px;
+    color:var(--text-muted);
+    animation:ticker-scroll 26s linear infinite;
+    padding-left:18px;
+  }
+  .ticker-track .up{color:var(--green); font-weight:700;}
+  .ticker-track .down{color:var(--red); font-weight:700;}
+  @keyframes ticker-scroll{
+    from{transform:translateX(0);}
+    to{transform:translateX(-50%);}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .ticker-track{animation:none;}
+  }
+  .tab{
+    flex:1;
+    padding:11px 6px;
+    text-align:center;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--text-muted);
+    font-weight:600;
+    font-size:13.5px;
+    cursor:pointer;
+    user-select:none;
+    transition:.15s;
+    letter-spacing:.2px;
+  }
+  .tab.active{
+    background:var(--select-dim);
+    border-color:var(--select);
+    color:var(--select);
+  }
+
+  main{max-width:640px; margin:0 auto; padding:16px 18px 60px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .panel-title{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    color:var(--text-muted);
+    margin-bottom:12px;
+    font-weight:600;
+  }
+
+  /* ---------- Choice buttons ---------- */
+  .choice-row{
+    display:grid;
+    gap:8px;
+    grid-template-columns:repeat(var(--cols,2), 1fr);
+  }
+  .choice-btn{
+    padding:16px 8px;
+    background:var(--panel-2);
+    border:1.5px solid var(--border);
+    border-radius:10px;
+    color:var(--text);
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    text-align:center;
+    transition:.12s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .choice-btn:active{transform:scale(.96);}
+  .choice-btn.sel-neutral.selected{
+    border-color:var(--select); background:var(--select-dim); color:var(--select);
+  }
+  .choice-btn.sel-green.selected{
+    border-color:var(--green); background:var(--green-dim); color:var(--green);
+  }
+  .choice-btn.sel-red.selected{
+    border-color:var(--red); background:var(--red-dim); color:var(--red);
+  }
+
+  .choice-btn.conf-btn{
+    position:relative;
+  }
+  .check-ico{
+    display:none;
+    margin-left:6px;
+  }
+  .choice-btn.conf-btn.selected .check-ico{
+    display:inline;
+  }
+  .confluence-note{
+    font-size:12px; color:var(--text-muted); margin-top:10px;
+  }
+  .confluence-note.full{
+    color:var(--green); font-weight:600;
+  }
+
+  /* ---------- Checklist ---------- */
+  .check-item{
+    border:1.5px solid var(--border);
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:10px;
+    background:var(--panel-2);
+  }
+  .check-item.risk{
+    border-color:var(--amber);
+    background:var(--amber-dim);
+    box-shadow:0 0 0 1px var(--amber) inset;
+  }
+  .check-item.risk .check-label{color:var(--amber);}
+  .check-item.answered-yes{border-color:var(--green);}
+  .check-item.answered-no{border-color:var(--red);}
+  .check-label{
+    font-size:14px; font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:6px;
+  }
+  .risk-tag{
+    font-size:10px; background:var(--amber); color:#0d0d0d;
+    padding:2px 6px; border-radius:6px; font-weight:700; letter-spacing:.4px;
+  }
+  .yesno-row{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .yn-btn{
+    padding:11px; border-radius:8px; border:1.5px solid var(--border);
+    background:var(--panel); color:var(--text-muted); font-weight:600; font-size:14px; cursor:pointer;
+    transition:.12s;
+  }
+  .yn-btn.yes.selected{background:var(--green-dim); border-color:var(--green); color:var(--green);}
+  .yn-btn.no.selected{background:var(--red-dim); border-color:var(--red); color:var(--red);}
+
+  .warning-banner{
+    display:none;
+    background:var(--red-dim);
+    border:1px solid var(--red);
+    color:var(--red);
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:13.5px;
+    font-weight:600;
+    margin-bottom:12px;
+    align-items:center;
+    gap:8px;
+  }
+  .warning-banner.show{display:flex;}
+
+  /* ---------- Upload ---------- */
+  .upload-box{
+    border:1.5px dashed var(--border);
+    border-radius:12px;
+    padding:18px;
+    text-align:center;
+    color:var(--text-muted);
+    cursor:pointer;
+    font-size:13.5px;
+    position:relative;
+    overflow:hidden;
+  }
+  .upload-box.has-img{border-style:solid; border-color:var(--select); padding:0;}
+  .upload-box img{max-width:100%; display:block; border-radius:10px;}
+  .upload-box input{position:absolute; inset:0; opacity:0; cursor:pointer;}
+  .remove-img{
+    position:absolute; top:6px; right:6px; background:rgba(0,0,0,.6);
+    color:#fff; border:none; border-radius:6px; padding:4px 8px; font-size:12px; cursor:pointer; z-index:2;
+  }
+
+  /* ---------- Behavioral ---------- */
+  textarea{
+    width:100%; min-height:64px; resize:vertical;
+    background:var(--panel-2); border:1.5px solid var(--border); border-radius:10px;
+    color:var(--text); padding:11px; font-family:'Inter',sans-serif; font-size:14px;
+  }
+  textarea:focus{outline:none; border-color:var(--select);}
+  .emotion-row{display:flex; flex-wrap:wrap; gap:7px; margin-top:10px;}
+  .emo-btn{
+    padding:8px 12px; border-radius:20px; border:1.5px solid var(--border);
+    background:var(--panel-2); color:var(--text-muted); font-size:13px; cursor:pointer; font-weight:500;
+  }
+  .emo-btn.selected{border-color:var(--select); background:var(--select-dim); color:var(--select);}
+
+  /* ---------- Save gate (signature element) ---------- */
+  .save-gate{
+    margin-top:4px;
+    width:100%;
+    padding:16px;
+    border-radius:12px;
+    border:none;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:16px;
+    font-weight:700;
+    cursor:not-allowed;
+    background:var(--panel-2);
+    color:var(--text-muted);
+    border:1.5px solid var(--border);
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    transition:.2s;
+    letter-spacing:.2px;
+  }
+  .save-gate.unlocked{
+    cursor:pointer;
+    background:linear-gradient(135deg, var(--green), #23a578);
+    color:#06120c;
+    border-color:transparent;
+    box-shadow:0 6px 20px -6px rgba(46,204,143,.5);
+  }
+  .save-gate.unlocked:active{transform:scale(.98);}
+  .gate-count{
+    font-family:'JetBrains Mono',monospace; font-size:12px; opacity:.8;
+  }
+
+  /* ---------- History ---------- */
+  .empty-state{
+    text-align:center; padding:50px 20px; color:var(--text-muted);
+  }
+  .trade-card{
+    background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px; margin-bottom:12px;
+  }
+  .trade-head{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;
+  }
+  .trade-tags{display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+  .badge{
+    font-size:11px; font-weight:700; padding:4px 8px; border-radius:6px; letter-spacing:.3px;
+  }
+  .badge.gain{background:var(--green-dim); color:var(--green);}
+  .badge.loss{background:var(--red-dim); color:var(--red);}
+  .badge.neutral{background:var(--select-dim); color:var(--select);}
+  .trade-date{font-size:11.5px; color:var(--text-muted); font-family:'JetBrains Mono',monospace;}
+  .del-btn{
+    background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px; padding:2px 6px;
+  }
+  .del-btn:hover{color:var(--red);}
+  .checklist-status{
+    display:flex; gap:10px; flex-wrap:wrap; font-size:12px; margin-bottom:10px; color:var(--text-muted);
+  }
+  .checklist-status .ok{color:var(--green);}
+  .checklist-status .bad{color:var(--red);}
+  .trade-card img{width:100%; border-radius:10px; margin-top:8px; display:block;}
+  .trade-feel{font-size:13px; color:var(--text-muted); margin-top:6px; font-style:italic;}
+
+  /* ---------- Analysis ---------- */
+  .stat-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;
+  }
+  .stat-box{
+    background:var(--panel-2); border:1px solid var(--border); border-radius:12px; padding:14px;
+  }
+  .stat-num{font-family:'JetBrains Mono',monospace; font-size:26px; font-weight:700;}
+  .stat-num.green{color:var(--green);} .stat-num.red{color:var(--red);}
+  .stat-label{font-size:11.5px; color:var(--text-muted); margin-top:4px;}
+  .insight{
+    display:flex; gap:10px; align-items:flex-start;
+    padding:12px; border-radius:10px; margin-bottom:8px; font-size:13.5px; font-weight:500;
+  }
+  .insight.good{background:var(--green-dim); color:var(--green);}
+  .insight.bad{background:var(--red-dim); color:var(--red);}
+  .insight.warn{background:var(--amber-dim); color:var(--amber);}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--border); border-radius:4px;}
+</style>
+</head>
+<body>
+
+<div class="bg-deco" aria-hidden="true">
+  <svg class="bg-bull" viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg">
+    <path d="M40 150 C 30 120, 40 95, 65 82 C 60 65, 70 48, 90 42 C 88 30, 98 18, 112 20 C 108 32, 116 40, 128 38 C 132 24, 148 16, 162 22 C 156 34, 162 46, 176 48 C 190 50, 200 62, 196 76 C 214 82, 222 100, 212 116 C 226 122, 232 138, 222 150 C 214 160, 198 162, 188 154 C 180 168, 162 172, 150 162 L 150 178 L 138 178 L 136 164 L 108 164 L 104 178 L 92 178 L 94 160 C 70 156, 48 168, 40 150 Z"
+      fill="none" stroke="#26a65b" stroke-width="2.4"/>
+    <circle cx="176" cy="60" r="4" fill="#26a65b"/>
+  </svg>
+  <svg class="bg-dollar" viewBox="0 0 100 160" xmlns="http://www.w3.org/2000/svg">
+    <text x="50" y="130" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="150" font-weight="700" fill="#8f8f8f">$</text>
+  </svg>
+</div>
+
+<header>
+  <div class="header-chart" aria-hidden="true">
+    <svg viewBox="0 0 600 100" preserveAspectRatio="none">
+      <polyline points="0,20 30,26 60,18 90,32 120,45 150,60 180,72 210,66 240,78 270,70 300,55 330,60 360,44 390,50 420,36 450,40 480,28 510,34 540,20 570,26 600,16"
+        fill="none" stroke="#8f8f8f" stroke-width="1.4" opacity=".8"/>
+      <rect x="55" y="14" width="4" height="10" fill="#26a65b"/>
+      <rect x="85" y="24" width="4" height="14" fill="#e2434f"/>
+      <rect x="145" y="52" width="4" height="16" fill="#e2434f"/>
+      <rect x="205" y="58" width="4" height="12" fill="#26a65b"/>
+      <rect x="265" y="62" width="4" height="14" fill="#26a65b"/>
+      <rect x="325" y="52" width="4" height="12" fill="#26a65b"/>
+      <rect x="385" y="42" width="4" height="14" fill="#e2434f"/>
+      <rect x="445" y="32" width="4" height="12" fill="#26a65b"/>
+      <rect x="505" y="28" width="4" height="14" fill="#e2434f"/>
+      <rect x="565" y="16" width="4" height="12" fill="#26a65b"/>
+      <path d="M0 40 Q 150 70 300 45 T 600 40" stroke="#4a4a4a" stroke-width="1" fill="none" opacity=".6"/>
+    </svg>
+  </div>
+  <div class="brand">
+    <div class="dot"></div>
+    <div>
+      <h1>🐂 Diário de Trading</h1>
+      <span>Disciplina antes do lucro.</span>
+    </div>
+  </div>
+</header>
+
+<div class="ticker-bar" aria-hidden="true">
+  <div class="ticker-track">
+    <span>NASDAQ <span class="up">▲</span></span>
+    <span>OURO <span class="down">▼</span></span>
+    <span>USD/BRL <span class="up">▲</span></span>
+    <span>DOW JONES <span class="up">▲</span></span>
+    <span>S&amp;P 500 <span class="down">▼</span></span>
+    <span>WALL STREET <span class="up">▲</span></span>
+    <span>NASDAQ <span class="up">▲</span></span>
+    <span>OURO <span class="down">▼</span></span>
+    <span>USD/BRL <span class="up">▲</span></span>
+    <span>DOW JONES <span class="up">▲</span></span>
+    <span>S&amp;P 500 <span class="down">▼</span></span>
+    <span>WALL STREET <span class="up">▲</span></span>
+  </div>
+</div>
+
+<nav>
+  <div class="tab active" data-view="registrar">Registrar</div>
+  <div class="tab" data-view="historico">Histórico</div>
+  <div class="tab" data-view="analise">Análise</div>
+</nav>
+
+<main>
+
+  <!-- ===================== REGISTRAR ===================== -->
+  <div class="view active" id="view-registrar">
+
+    <div class="panel">
+      <div class="panel-title">Ativo</div>
+      <div class="choice-row" style="--cols:2" data-group="ativo">
+        <div class="choice-btn sel-neutral" data-value="NASDAQ">NASDAQ</div>
+        <div class="choice-btn sel-neutral" data-value="OURO">OURO</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Tipo de operação</div>
+      <div class="choice-row" style="--cols:2" data-group="tipo">
+        <div class="choice-btn sel-neutral" data-value="Compra">Compra</div>
+        <div class="choice-btn sel-neutral" data-value="Venda">Venda</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Tempo gráfico — confluência</div>
+      <div class="choice-row" style="--cols:3" data-group="tempo">
+        <div class="choice-btn sel-green conf-btn" data-value="2min">2min<span class="check-ico">✔</span></div>
+        <div class="choice-btn sel-green conf-btn" data-value="5min">5min<span class="check-ico">✔</span></div>
+        <div class="choice-btn sel-green conf-btn" data-value="60min">60min<span class="check-ico">✔</span></div>
+      </div>
+      <div class="confluence-note" id="confluenceNote">Marque os tempos gráficos que estão confluindo (na mesma direção).</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Resultado</div>
+      <div class="choice-row" style="--cols:2" data-group="resultado">
+        <div class="choice-btn sel-green" data-value="Gain">Gain</div>
+        <div class="choice-btn sel-red" data-value="Loss">Loss</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Print da operação (opcional)</div>
+      <div class="upload-box" id="uploadBox">
+        <span id="uploadLabel">Toque para anexar imagem</span>
+        <input type="file" accept="image/*" id="imgInput">
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Checklist obrigatório</div>
+
+      <div class="check-item" data-check="tendencia">
+        <div class="check-label">Mercado está em tendência?</div>
+        <div class="yesno-row">
+          <div class="yn-btn yes" data-value="Sim">Sim</div>
+          <div class="yn-btn no" data-value="Não">Não</div>
+        </div>
+      </div>
+
+      <div class="check-item" data-check="medias">
+        <div class="check-label">Médias (2, 5 e 60) estão a favor?</div>
+        <div class="yesno-row">
+          <div class="yn-btn yes" data-value="Sim">Sim</div>
+          <div class="yn-btn no" data-value="Não">Não</div>
+        </div>
+      </div>
+
+      <div class="check-item" data-check="risco_retorno">
+        <div class="check-label">Relação risco-retorno está adequada?</div>
+        <div class="yesno-row">
+          <div class="yn-btn yes" data-value="Sim">Sim</div>
+          <div class="yn-btn no" data-value="Não">Não</div>
+        </div>
+      </div>
+
+      <div class="check-item" data-check="alvo">
+        <div class="check-label">Alvo está definido?</div>
+        <div class="yesno-row">
+          <div class="yn-btn yes" data-value="Sim">Sim</div>
+          <div class="yn-btn no" data-value="Não">Não</div>
+        </div>
+      </div>
+
+      <div class="check-item risk" data-check="gerenciamento">
+        <div class="check-label"><span class="risk-tag">CRÍTICO</span> Segui o gerenciamento de risco?</div>
+        <div class="yesno-row">
+          <div class="yn-btn yes" data-value="Sim">Sim</div>
+          <div class="yn-btn no" data-value="Não">Não</div>
+        </div>
+      </div>
+
+      <div class="warning-banner" id="riskWarning">⚠️ Siga o gerenciamento de risco. Isso será registrado no seu histórico.</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Comportamental</div>
+      <textarea id="feelText" placeholder="Como estou me sentindo hoje?"></textarea>
+      <div class="emotion-row" data-group="emocao">
+        <div class="emo-btn" data-value="Ansioso">Ansioso</div>
+        <div class="emo-btn" data-value="Confiante">Confiante</div>
+        <div class="emo-btn" data-value="Com medo">Com medo</div>
+        <div class="emo-btn" data-value="Neutro">Neutro</div>
+        <div class="emo-btn" data-value="Eufórico">Eufórico</div>
+        <div class="emo-btn" data-value="Frustrado">Frustrado</div>
+      </div>
+    </div>
+
+    <button class="save-gate" id="saveBtn">
+      <span id="gateIcon">🔒</span>
+      <span id="gateText">Complete o checklist</span>
+    </button>
+
+  </div>
+
+  <!-- ===================== HISTÓRICO ===================== -->
+  <div class="view" id="view-historico">
+    <div id="historyList"></div>
+  </div>
+
+  <!-- ===================== ANÁLISE ===================== -->
+  <div class="view" id="view-analise">
+    <div class="panel">
+      <div class="panel-title">Últimos 7 dias</div>
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-num mono" id="statCount">0</div>
+          <div class="stat-label">Operações</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num mono green" id="statRisk">0%</div>
+          <div class="stat-label">Com gerenciamento correto</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num mono red" id="statOffPlan">0%</div>
+          <div class="stat-label">Fora do plano</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num mono" id="statWinrate">0%</div>
+          <div class="stat-label">Taxa de acerto</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Padrões de comportamento</div>
+      <div id="insightsBox"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'trading_journal_trades_v1';
+
+  // ---------- state ----------
+  let state = {
+    ativo:null, tipo:null, tempo:[], resultado:null,
+    image:null,
+    checklist:{ tendencia:null, medias:null, risco_retorno:null, alvo:null, gerenciamento:null },
+    emocao:null
+  };
+
+  const $ = (sel, ctx) => (ctx||document).querySelector(sel);
+  const $all = (sel, ctx) => Array.from((ctx||document).querySelectorAll(sel));
+
+  // ---------- tabs ----------
+  $all('.tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      $all('.tab').forEach(t=>t.classList.remove('active'));
+      $all('.view').forEach(v=>v.classList.remove('active'));
+      tab.classList.add('active');
+      $('#view-'+tab.dataset.view).classList.add('active');
+      if(tab.dataset.view==='historico') renderHistory();
+      if(tab.dataset.view==='analise') renderAnalysis();
+    });
+  });
+
+  // ---------- simple choice groups (ativo, tipo, resultado) — single select ----------
+  ['ativo','tipo','resultado'].forEach(group=>{
+    const row = document.querySelector(`[data-group="${group}"]`);
+    $all('.choice-btn', row).forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        $all('.choice-btn', row).forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        state[group] = btn.dataset.value;
+        updateGate();
+      });
+    });
+  });
+
+  // ---------- tempo gráfico (confluência) — múltipla seleção com visto verde ----------
+  const tempoRow = document.querySelector('[data-group="tempo"]');
+  const confluenceNote = $('#confluenceNote');
+  $all('.choice-btn', tempoRow).forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const value = btn.dataset.value;
+      const idx = state.tempo.indexOf(value);
+      if(idx === -1){
+        state.tempo.push(value);
+        btn.classList.add('selected');
+      } else {
+        state.tempo.splice(idx,1);
+        btn.classList.remove('selected');
+      }
+      updateConfluenceNote();
+      updateGate();
+    });
+  });
+
+  function updateConfluenceNote(){
+    const n = state.tempo.length;
+    if(n === 3){
+      confluenceNote.textContent = '✅ Confluência total: os 3 tempos gráficos estão alinhados.';
+      confluenceNote.classList.add('full');
+    } else if(n === 0){
+      confluenceNote.textContent = 'Marque os tempos gráficos que estão confluindo (na mesma direção).';
+      confluenceNote.classList.remove('full');
+    } else {
+      confluenceNote.textContent = `${n}/3 tempos gráficos marcados como confluentes.`;
+      confluenceNote.classList.remove('full');
+    }
+  }
+
+  // ---------- emotion (optional, single select) ----------
+  const emoRow = document.querySelector('[data-group="emocao"]');
+  $all('.emo-btn', emoRow).forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const already = btn.classList.contains('selected');
+      $all('.emo-btn', emoRow).forEach(b=>b.classList.remove('selected'));
+      if(!already){
+        btn.classList.add('selected');
+        state.emocao = btn.dataset.value;
+      } else {
+        state.emocao = null;
+      }
+    });
+  });
+
+  // ---------- checklist ----------
+  $all('.check-item').forEach(item=>{
+    const key = item.dataset.check;
+    $all('.yn-btn', item).forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        $all('.yn-btn', item).forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        state.checklist[key] = btn.dataset.value;
+        item.classList.remove('answered-yes','answered-no');
+        item.classList.add(btn.dataset.value==='Sim' ? 'answered-yes' : 'answered-no');
+        if(key==='gerenciamento'){
+          $('#riskWarning').classList.toggle('show', btn.dataset.value==='Não');
+        }
+        updateGate();
+      });
+    });
+  });
+
+  // ---------- image upload (resized + compressed) ----------
+  const uploadBox = $('#uploadBox');
+  const imgInput = $('#imgInput');
+  imgInput.addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const maxW = 640;
+        const scale = Math.min(1, maxW/img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width*scale;
+        canvas.height = img.height*scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        state.image = canvas.toDataURL('image/jpeg', 0.7);
+        renderUploadPreview();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function renderUploadPreview(){
+    if(state.image){
+      uploadBox.classList.add('has-img');
+      uploadBox.innerHTML = `
+        <img src="${state.image}" alt="print da operação">
+        <button class="remove-img" id="removeImgBtn" type="button">Remover</button>
+        <input type="file" accept="image/*" id="imgInput">
+      `;
+      $('#removeImgBtn').addEventListener('click', (e)=>{
+        e.preventDefault(); e.stopPropagation();
+        state.image = null;
+        uploadBox.classList.remove('has-img');
+        renderUploadPreview();
+      });
+      rebindImgInput();
+    } else {
+      uploadBox.classList.remove('has-img');
+      uploadBox.innerHTML = `
+        <span id="uploadLabel">Toque para anexar imagem</span>
+        <input type="file" accept="image/*" id="imgInput">
+      `;
+      rebindImgInput();
+    }
+  }
+  function rebindImgInput(){
+    const inp = $('#imgInput');
+    inp.addEventListener('change', (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev)=>{
+        const img = new Image();
+        img.onload = ()=>{
+          const maxW = 640;
+          const scale = Math.min(1, maxW/img.width);
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width*scale;
+          canvas.height = img.height*scale;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img,0,0,canvas.width,canvas.height);
+          state.image = canvas.toDataURL('image/jpeg', 0.7);
+          renderUploadPreview();
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ---------- save gate ----------
+  const saveBtn = $('#saveBtn');
+  const gateIcon = $('#gateIcon');
+  const gateText = $('#gateText');
+
+  function checklistComplete(){
+    return Object.values(state.checklist).every(v=>v==='Sim'||v==='Não');
+  }
+  function answeredCount(){
+    return Object.values(state.checklist).filter(v=>v==='Sim'||v==='Não').length;
+  }
+
+  function updateGate(){
+    const complete = checklistComplete();
+    if(complete){
+      saveBtn.classList.add('unlocked');
+      gateIcon.textContent = '🔓';
+      gateText.textContent = 'Salvar operação';
+    } else {
+      saveBtn.classList.remove('unlocked');
+      gateIcon.textContent = '🔒';
+      gateText.textContent = `Complete o checklist (${answeredCount()}/5)`;
+    }
+  }
+
+  saveBtn.addEventListener('click', ()=>{
+    if(!checklistComplete()) return;
+    const trade = {
+      id: Date.now(),
+      data: new Date().toISOString(),
+      ativo: state.ativo,
+      tipo: state.tipo,
+      tempo: [...state.tempo],
+      resultado: state.resultado,
+      image: state.image,
+      checklist: {...state.checklist},
+      emocao: state.emocao,
+      sentimento: $('#feelText').value.trim()
+    };
+    const trades = loadTrades();
+    trades.unshift(trade);
+    saveTrades(trades);
+    resetForm();
+    alert('Operação salva.');
+  });
+
+  function resetForm(){
+    state = {
+      ativo:null, tipo:null, tempo:[], resultado:null,
+      image:null,
+      checklist:{ tendencia:null, medias:null, risco_retorno:null, alvo:null, gerenciamento:null },
+      emocao:null
+    };
+    $all('.choice-btn').forEach(b=>b.classList.remove('selected'));
+    $all('.emo-btn').forEach(b=>b.classList.remove('selected'));
+    $all('.yn-btn').forEach(b=>b.classList.remove('selected'));
+    $all('.check-item').forEach(i=>i.classList.remove('answered-yes','answered-no'));
+    $('#riskWarning').classList.remove('show');
+    $('#feelText').value = '';
+    updateConfluenceNote();
+    renderUploadPreview();
+    updateGate();
+  }
+
+  // ---------- storage ----------
+  function loadTrades(){
+    try{
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    }catch(e){ return []; }
+  }
+  function saveTrades(trades){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(trades));
+    }catch(e){
+      alert('Não foi possível salvar. O armazenamento local pode estar cheio (imagens grandes). Tente remover operações antigas.');
+    }
+  }
+
+  // ---------- history ----------
+  function renderHistory(){
+    const trades = loadTrades();
+    const list = $('#historyList');
+    if(trades.length===0){
+      list.innerHTML = `<div class="empty-state">Nenhuma operação registrada ainda.<br>Vá em <b>Registrar</b> para começar.</div>`;
+      return;
+    }
+    list.innerHTML = trades.map(t=>{
+      const date = new Date(t.data);
+      const dateStr = date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      const checks = ['tendencia','medias','risco_retorno','alvo','gerenciamento'];
+      const labels = {tendencia:'Tendência', medias:'Médias', risco_retorno:'Risco/Retorno', alvo:'Alvo', gerenciamento:'Gerenc. Risco'};
+      const checksHtml = checks.map(c=>{
+        const ok = t.checklist[c]==='Sim';
+        return `<span class="${ok?'ok':'bad'}">${ok?'✔':'✘'} ${labels[c]}</span>`;
+      }).join('');
+      const tempoArr = t.tempo || [];
+      const allTf = ['2min','5min','60min'];
+      const confluenceHtml = allTf.map(tf=>{
+        const on = tempoArr.includes(tf);
+        return `<span class="${on?'ok':'bad'}">${on?'✔':'✘'} ${tf}</span>`;
+      }).join('');
+      const fullConfluence = tempoArr.length === 3;
+      return `
+        <div class="trade-card">
+          <div class="trade-head">
+            <div class="trade-tags">
+              <span class="badge ${t.resultado==='Gain'?'gain':'loss'}">${t.resultado||'-'}</span>
+              ${t.ativo?`<span class="badge neutral">${t.ativo}</span>`:''}
+              ${t.tipo?`<span class="badge neutral">${t.tipo}</span>`:''}
+              ${fullConfluence?`<span class="badge gain">Confluência total</span>`:''}
+            </div>
+            <button class="del-btn" data-id="${t.id}" title="Excluir">✕</button>
+          </div>
+          <div class="trade-date">${dateStr}</div>
+          <div class="checklist-status">${confluenceHtml}</div>
+          <div class="checklist-status">${checksHtml}</div>
+          ${t.sentimento ? `<div class="trade-feel">"${escapeHtml(t.sentimento)}"${t.emocao? ' · '+t.emocao : ''}</div>` : (t.emocao?`<div class="trade-feel">${t.emocao}</div>`:'')}
+          ${t.image ? `<img src="${t.image}" alt="print da operação">` : ''}
+        </div>
+      `;
+    }).join('');
+
+    $all('.del-btn', list).forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        if(!confirm('Excluir esta operação?')) return;
+        const id = Number(btn.dataset.id);
+        const remaining = loadTrades().filter(t=>t.id!==id);
+        saveTrades(remaining);
+        renderHistory();
+      });
+    });
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ---------- analysis ----------
+  function renderAnalysis(){
+    const trades = loadTrades();
+    const now = Date.now();
+    const weekMs = 7*24*60*60*1000;
+    const recent = trades.filter(t=> now - new Date(t.data).getTime() <= weekMs );
+
+    const count = recent.length;
+    $('#statCount').textContent = count;
+
+    if(count===0){
+      $('#statRisk').textContent = '—';
+      $('#statOffPlan').textContent = '—';
+      $('#statWinrate').textContent = '—';
+      $('#insightsBox').innerHTML = `<div class="insight warn">Sem operações nos últimos 7 dias. Registre trades para gerar sua análise.</div>`;
+      return;
+    }
+
+    const riskOk = recent.filter(t=>t.checklist.gerenciamento==='Sim').length;
+    const riskPct = Math.round((riskOk/count)*100);
+
+    const offPlan = recent.filter(t=> Object.values(t.checklist).some(v=>v==='Não') ).length;
+    const offPlanPct = Math.round((offPlan/count)*100);
+
+    const gains = recent.filter(t=>t.resultado==='Gain').length;
+    const winratePct = Math.round((gains/count)*100);
+
+    $('#statRisk').textContent = riskPct+'%';
+    $('#statOffPlan').textContent = offPlanPct+'%';
+    $('#statWinrate').textContent = winratePct+'%';
+
+    // insights
+    const insights = [];
+
+    if(riskPct < 50){
+      insights.push({type:'bad', text:'Você está ignorando o gerenciamento de risco com frequência.'});
+    } else if(riskPct < 80){
+      insights.push({type:'warn', text:'Seu gerenciamento de risco está razoável, mas ainda há espaço para melhorar.'});
+    } else {
+      insights.push({type:'good', text:'Boa disciplina no gerenciamento de risco, continue assim.'});
+    }
+
+    if(offPlanPct >= 40){
+      insights.push({type:'bad', text:'Muitas operações fora do plano. Revise seu checklist antes de operar.'});
+    }
+
+    // consistency: mix of gains/losses combined with risk violations
+    const lossesWithRiskBroken = recent.filter(t=>t.resultado==='Loss' && t.checklist.gerenciamento==='Não').length;
+    if(lossesWithRiskBroken >= 2){
+      insights.push({type:'bad', text:'Seu comportamento está inconsistente: perdas se repetem quando o gerenciamento de risco não é seguido.'});
+    }
+
+    // confluência dos tempos gráficos
+    const fullConfluenceCount = recent.filter(t=> (t.tempo||[]).length === 3 ).length;
+    const confluencePct = Math.round((fullConfluenceCount/count)*100);
+    const gainsWithFullConfluence = recent.filter(t=> (t.tempo||[]).length===3 && t.resultado==='Gain').length;
+    if(fullConfluenceCount > 0){
+      const gainRateWithConfluence = Math.round((gainsWithFullConfluence/fullConfluenceCount)*100);
+      insights.push({type: gainRateWithConfluence>=60?'good':'warn', text:`Com confluência total nos 3 tempos gráficos, sua taxa de acerto é ${gainRateWithConfluence}% (${fullConfluenceCount} operações).`});
+    }
+    if(confluencePct < 40){
+      insights.push({type:'warn', text:'Poucas operações têm os 3 tempos gráficos confluindo. Priorize entradas com alinhamento total.'});
+    }
+
+    // emotion pattern
+    const emoCounts = {};
+    recent.forEach(t=>{ if(t.emocao) emoCounts[t.emocao]=(emoCounts[t.emocao]||0)+1; });
+    const topEmo = Object.entries(emoCounts).sort((a,b)=>b[1]-a[1])[0];
+    if(topEmo && topEmo[1] >= 3){
+      insights.push({type:'warn', text:`Emoção mais frequente esta semana: "${topEmo[0]}" (${topEmo[1]}x). Observe se ela influencia suas decisões.`});
+    }
+
+    if(insights.length===1 && insights[0].type==='good'){
+      insights.push({type:'good', text:`${count} operações analisadas nos últimos 7 dias.`});
+    }
+
+    $('#insightsBox').innerHTML = insights.map(i=>`<div class="insight ${i.type}">${iconFor(i.type)} ${i.text}</div>`).join('');
+  }
+
+  function iconFor(type){
+    if(type==='good') return '✅';
+    if(type==='bad') return '⚠️';
+    return '🔎';
+  }
+
+  // ---------- init ----------
+  updateConfluenceNote();
+  renderUploadPreview();
+  updateGate();
+})();
+</script>
+</body>
+</html>
