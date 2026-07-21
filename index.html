@@ -76,11 +76,6 @@
   .brand h1{font-size:20px; letter-spacing:.2px;}
   .brand span{color:var(--text-muted); font-size:13px; display:block; margin-top:2px;}
 
-  nav{
-    max-width:640px; margin:16px auto 0; padding:0 18px;
-    display:flex; gap:8px;
-  }
-
   .ticker-bar{
     max-width:640px; margin:14px auto 0; padding:7px 18px;
     background:rgba(10,10,10,.45);
@@ -105,30 +100,22 @@
   @media (prefers-reduced-motion:reduce){
     .ticker-track{animation:none;}
   }
-  .tab{
-    flex:1;
-    padding:11px 6px;
-    text-align:center;
-    background:var(--panel);
-    border:1px solid var(--border);
-    border-radius:10px;
-    color:var(--text-muted);
-    font-weight:600;
-    font-size:13.5px;
-    cursor:pointer;
-    user-select:none;
-    transition:.15s;
-    letter-spacing:.2px;
-  }
-  .tab.active{
-    background:var(--select-dim);
-    border-color:var(--select);
-    color:var(--select);
-  }
-
   main{max-width:640px; margin:0 auto; padding:16px 18px 60px;}
-  .view{display:none;}
-  .view.active{display:block;}
+  .view{display:block;}
+
+  .section-heading{
+    max-width:640px; margin:30px auto 12px; padding:0 18px;
+    font-size:15px; letter-spacing:.6px; text-transform:uppercase;
+    color:var(--text-muted);
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-heading::before{
+    content:"";
+    width:4px; height:16px; border-radius:2px;
+    background:var(--green);
+    display:inline-block;
+  }
+  .section-heading:first-of-type{margin-top:18px;}
 
   .panel{
     background:var(--panel);
@@ -338,6 +325,57 @@
   .trade-card img{width:100%; border-radius:10px; margin-top:8px; display:block;}
   .trade-feel{font-size:13px; color:var(--text-muted); margin-top:6px; font-style:italic;}
 
+  /* ---------- Revisão do Dia ---------- */
+  .rec-row{display:flex; justify-content:center;}
+  .rec-btn{
+    display:flex; align-items:center; gap:10px;
+    padding:16px 26px;
+    background:var(--panel-2);
+    border:1.5px solid var(--border);
+    border-radius:30px;
+    color:var(--text);
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .rec-btn.recording{
+    border-color:var(--red);
+    background:var(--red-dim);
+    color:var(--red);
+    animation:rec-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes rec-pulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(255,84,104,.35); }
+    50%{ box-shadow:0 0 0 10px rgba(255,84,104,0); }
+  }
+  .rec-note{
+    text-align:center; font-size:12px; color:var(--text-muted); margin-top:10px;
+  }
+  .csv-box span{ font-size:13.5px; }
+  .ocr-status{
+    font-size:12.5px; color:var(--text-muted); margin-top:10px;
+  }
+  .ocr-status.busy{color:var(--select);}
+  .ocr-text{
+    margin-top:8px; width:100%; min-height:50px;
+  }
+  .csv-stats-row{
+    display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;
+  }
+  .csv-stat{
+    background:var(--panel-2); border:1px solid var(--border); border-radius:10px;
+    padding:8px 12px; font-size:12.5px; color:var(--text-muted);
+  }
+  .csv-stat b{ color:var(--text); font-family:'JetBrains Mono',monospace; }
+  .review-card{
+    background:var(--panel); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px; margin-bottom:12px;
+  }
+  .review-card .trade-date{margin-bottom:8px;}
+  .review-card .trade-feel{font-style:normal;}
+
   /* ---------- Analysis ---------- */
   .stat-grid{
     display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;
@@ -390,16 +428,11 @@
   </div>
 </div>
 
-<nav>
-  <div class="tab active" data-view="registrar">Registrar</div>
-  <div class="tab" data-view="historico">Histórico</div>
-  <div class="tab" data-view="analise">Análise</div>
-</nav>
-
 <main>
 
   <!-- ===================== REGISTRAR ===================== -->
-  <div class="view active" id="view-registrar">
+  <h2 class="section-heading" id="registrar">Registrar operação</h2>
+  <div class="view" id="view-registrar">
 
     <div class="panel">
       <div class="panel-title">Ativo</div>
@@ -510,11 +543,13 @@
   </div>
 
   <!-- ===================== HISTÓRICO ===================== -->
+  <h2 class="section-heading" id="historico">Histórico</h2>
   <div class="view" id="view-historico">
     <div id="historyList"></div>
   </div>
 
   <!-- ===================== ANÁLISE ===================== -->
+  <h2 class="section-heading" id="analise">Análise semanal</h2>
   <div class="view" id="view-analise">
     <div class="panel">
       <div class="panel-title">Últimos 7 dias</div>
@@ -544,6 +579,56 @@
     </div>
   </div>
 
+  <!-- ===================== REVISÃO DO DIA ===================== -->
+  <h2 class="section-heading" id="revisao">Revisão do dia</h2>
+  <div class="view" id="view-revisao">
+
+    <div class="panel">
+      <div class="panel-title">Fale sobre o seu dia</div>
+      <div class="rec-row">
+        <button class="rec-btn" id="recBtn" type="button">
+          <span id="recIcon">🎙️</span>
+          <span id="recLabel">Gravar áudio</span>
+        </button>
+      </div>
+      <div class="rec-note" id="recNote">Toque para falar. O que você disser vira texto automaticamente.</div>
+      <textarea id="dayTranscript" placeholder="Transcrição do áudio aparece aqui (ou digite direto)…" style="margin-top:10px;"></textarea>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Print da tela (opcional)</div>
+      <div class="upload-box" id="reviewImgBox">
+        <span>Toque para anexar um print (resumo do dia, corretora, etc.)</span>
+        <input type="file" accept="image/*" id="reviewImgInput">
+      </div>
+      <div class="ocr-status" id="ocrStatus"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">CSV de operações (opcional)</div>
+      <div class="upload-box csv-box" id="csvBox">
+        <span>Toque para importar um arquivo .csv com suas operações</span>
+        <input type="file" accept=".csv,text/csv" id="csvInput">
+      </div>
+      <div id="csvStatsBox"></div>
+    </div>
+
+    <button class="save-gate unlocked" id="generateReviewBtn">
+      <span>🧭</span><span>Gerar análise do dia</span>
+    </button>
+
+    <div class="panel" id="reviewResultPanel" style="display:none; margin-top:14px;">
+      <div class="panel-title">O que você pode melhorar</div>
+      <div id="reviewInsightsBox"></div>
+      <button class="save-gate unlocked" id="saveReviewBtn" style="margin-top:10px;">
+        <span>💾</span><span>Salvar esta revisão</span>
+      </button>
+    </div>
+
+    <div class="panel-title" style="margin-top:20px;">Revisões salvas</div>
+    <div id="reviewHistoryList"></div>
+  </div>
+
 </main>
 
 <script>
@@ -560,18 +645,6 @@
 
   const $ = (sel, ctx) => (ctx||document).querySelector(sel);
   const $all = (sel, ctx) => Array.from((ctx||document).querySelectorAll(sel));
-
-  // ---------- tabs ----------
-  $all('.tab').forEach(tab=>{
-    tab.addEventListener('click', ()=>{
-      $all('.tab').forEach(t=>t.classList.remove('active'));
-      $all('.view').forEach(v=>v.classList.remove('active'));
-      tab.classList.add('active');
-      $('#view-'+tab.dataset.view).classList.add('active');
-      if(tab.dataset.view==='historico') renderHistory();
-      if(tab.dataset.view==='analise') renderAnalysis();
-    });
-  });
 
   // ---------- simple choice groups (ativo, tipo, resultado) — single select ----------
   ['ativo','tipo','resultado'].forEach(group=>{
@@ -769,6 +842,8 @@
     trades.unshift(trade);
     saveTrades(trades);
     resetForm();
+    renderHistory();
+    renderAnalysis();
     alert('Operação salva.');
   });
 
@@ -855,6 +930,7 @@
         const remaining = loadTrades().filter(t=>t.id!==id);
         saveTrades(remaining);
         renderHistory();
+        renderAnalysis();
       });
     });
   }
@@ -950,10 +1026,389 @@
     return '🔎';
   }
 
+  // ================== REVISÃO DO DIA ==================
+
+  // ---------- gravação de áudio (fala -> texto) ----------
+  let recognizer = null;
+  let isRecording = false;
+  const recBtn = $('#recBtn');
+  const recLabelEl = $('#recLabel');
+  const recIconEl = $('#recIcon');
+  const recNoteEl = $('#recNote');
+  const dayTranscriptEl = $('#dayTranscript');
+
+  const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if(!SpeechRecognitionAPI){
+    recNoteEl.textContent = 'Seu navegador não suporta gravação por voz. Use Chrome/Edge (computador ou Android), ou digite direto no campo abaixo.';
+  }
+
+  recBtn.addEventListener('click', ()=>{
+    if(!SpeechRecognitionAPI){ dayTranscriptEl.focus(); return; }
+    if(!isRecording) startRecording(); else stopRecording();
+  });
+
+  function startRecording(){
+    recognizer = new SpeechRecognitionAPI();
+    recognizer.lang = 'pt-BR';
+    recognizer.continuous = true;
+    recognizer.interimResults = true;
+
+    let baseText = dayTranscriptEl.value ? dayTranscriptEl.value.trim()+' ' : '';
+
+    recognizer.onresult = (event)=>{
+      let finalText = '', interimText = '';
+      for(let i=event.resultIndex; i<event.results.length; i++){
+        const transcript = event.results[i][0].transcript;
+        if(event.results[i].isFinal) finalText += transcript + ' ';
+        else interimText += transcript;
+      }
+      if(finalText) baseText += finalText;
+      dayTranscriptEl.value = (baseText + interimText).trim();
+    };
+    recognizer.onerror = ()=>{ stopRecording(); };
+    recognizer.onend = ()=>{
+      if(isRecording){ try{ recognizer.start(); }catch(e){} }
+    };
+
+    try{
+      recognizer.start();
+      isRecording = true;
+      recBtn.classList.add('recording');
+      recIconEl.textContent = '⏺️';
+      recLabelEl.textContent = 'Gravando… toque para parar';
+      recNoteEl.textContent = 'Fale naturalmente. Toque em "parar" quando terminar.';
+    }catch(e){
+      recNoteEl.textContent = 'Não foi possível acessar o microfone.';
+    }
+  }
+
+  function stopRecording(){
+    isRecording = false;
+    if(recognizer){ try{ recognizer.onend = null; recognizer.stop(); }catch(e){} }
+    recBtn.classList.remove('recording');
+    recIconEl.textContent = '🎙️';
+    recLabelEl.textContent = 'Gravar áudio';
+    recNoteEl.textContent = 'Toque para falar. O que você disser vira texto automaticamente.';
+  }
+
+  // ---------- print do dia + OCR (melhor esforço) ----------
+  let reviewImageData = null;
+  let ocrExtractedText = '';
+  const reviewImgBox = $('#reviewImgBox');
+  const ocrStatusEl = $('#ocrStatus');
+
+  function bindReviewImgInput(){
+    const inp = $('#reviewImgInput');
+    inp.addEventListener('change', (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev)=>{
+        const img = new Image();
+        img.onload = ()=>{
+          const maxW = 800;
+          const scale = Math.min(1, maxW/img.width);
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width*scale;
+          canvas.height = img.height*scale;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img,0,0,canvas.width,canvas.height);
+          reviewImageData = canvas.toDataURL('image/jpeg', 0.75);
+          renderReviewImgPreview();
+          runOcr(reviewImageData);
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderReviewImgPreview(){
+    if(reviewImageData){
+      reviewImgBox.classList.add('has-img');
+      reviewImgBox.innerHTML = `
+        <img src="${reviewImageData}" alt="print do dia">
+        <button class="remove-img" id="removeReviewImgBtn" type="button">Remover</button>
+        <input type="file" accept="image/*" id="reviewImgInput">
+      `;
+      $('#removeReviewImgBtn').addEventListener('click',(e)=>{
+        e.preventDefault(); e.stopPropagation();
+        reviewImageData = null; ocrExtractedText='';
+        ocrStatusEl.textContent = '';
+        reviewImgBox.classList.remove('has-img');
+        renderReviewImgPreview();
+      });
+    } else {
+      reviewImgBox.innerHTML = `
+        <span>Toque para anexar um print (resumo do dia, corretora, etc.)</span>
+        <input type="file" accept="image/*" id="reviewImgInput">
+      `;
+    }
+    bindReviewImgInput();
+  }
+
+  let tesseractLoadPromise = null;
+  function loadTesseract(){
+    if(window.Tesseract) return Promise.resolve();
+    if(tesseractLoadPromise) return tesseractLoadPromise;
+    tesseractLoadPromise = new Promise((resolve, reject)=>{
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    return tesseractLoadPromise;
+  }
+
+  async function runOcr(imageData){
+    ocrStatusEl.textContent = 'Lendo o print…';
+    ocrStatusEl.classList.add('busy');
+    try{
+      await loadTesseract();
+      const result = await Tesseract.recognize(imageData, 'por', { logger: ()=>{} });
+      ocrExtractedText = (result && result.data && result.data.text) ? result.data.text.trim() : '';
+      ocrStatusEl.classList.remove('busy');
+      if(ocrExtractedText){
+        ocrStatusEl.innerHTML = 'Texto identificado no print (edite se necessário):' +
+          `<textarea class="ocr-text" id="ocrTextArea">${escapeHtml(ocrExtractedText)}</textarea>`;
+        $('#ocrTextArea').addEventListener('input', (e)=>{ ocrExtractedText = e.target.value; });
+      } else {
+        ocrStatusEl.textContent = 'Não consegui identificar texto legível neste print. Ele será salvo como referência visual.';
+      }
+    }catch(e){
+      ocrStatusEl.classList.remove('busy');
+      ocrStatusEl.textContent = 'Não foi possível ler o print automaticamente (sem conexão ou navegador incompatível). Ele será salvo como referência visual.';
+    }
+  }
+
+  // ---------- CSV de operações ----------
+  let csvStatsData = null;
+  $('#csvInput').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      try{
+        csvStatsData = parseCsvTrades(ev.target.result);
+        renderCsvStats(csvStatsData);
+      }catch(err){
+        $('#csvStatsBox').innerHTML = `<div class="warning-banner show">⚠️ Não consegui ler esse CSV. Verifique se as colunas estão separadas por vírgula ou ponto e vírgula.</div>`;
+      }
+    };
+    reader.readAsText(file, 'utf-8');
+  });
+
+  function parseCsvTrades(text){
+    const lines = text.split(/\r\n|\n/).filter(l=>l.trim().length>0);
+    if(lines.length < 2) throw new Error('CSV vazio');
+    const delimiter = (lines[0].split(';').length > lines[0].split(',').length) ? ';' : ',';
+    const headers = lines[0].split(delimiter).map(h=>h.trim().toLowerCase());
+
+    const resultSynonyms = ['resultado','result','status','gain/loss','win/loss'];
+    const pnlSynonyms = ['lucro','pnl','valor','resultado financeiro','pontos','profit','p&l','saldo'];
+
+    const resultIdx = headers.findIndex(h=> resultSynonyms.some(s=>h.includes(s)) );
+    const pnlIdx = headers.findIndex(h=> pnlSynonyms.some(s=>h.includes(s)) );
+
+    let rows = [];
+    for(let i=1;i<lines.length;i++){
+      rows.push(lines[i].split(delimiter));
+    }
+
+    let gains=0, losses=0, pnlTotal=0, pnlCount=0;
+    let consecutiveLosses=0, maxConsecutiveLosses=0;
+
+    rows.forEach(cols=>{
+      let isGain = null;
+      if(resultIdx >= 0 && cols[resultIdx] !== undefined){
+        const val = cols[resultIdx].trim().toLowerCase();
+        if(['gain','win','vitória','vitoria','ganho','positivo'].some(v=>val.includes(v))) isGain = true;
+        if(['loss','perda','derrota','negativo'].some(v=>val.includes(v))) isGain = false;
+      }
+      if(pnlIdx >= 0 && cols[pnlIdx] !== undefined){
+        const raw = cols[pnlIdx].replace(/[^\d,.\-]/g,'').replace(',', '.');
+        const num = parseFloat(raw);
+        if(!isNaN(num)){
+          pnlTotal += num; pnlCount++;
+          if(isGain===null) isGain = num >= 0;
+        }
+      }
+      if(isGain === true){ gains++; consecutiveLosses=0; }
+      else if(isGain === false){ losses++; consecutiveLosses++; maxConsecutiveLosses = Math.max(maxConsecutiveLosses, consecutiveLosses); }
+    });
+
+    const total = gains+losses;
+    return {
+      totalRows: rows.length,
+      total, gains, losses,
+      winrate: total>0 ? Math.round((gains/total)*100) : null,
+      pnlTotal: pnlCount>0 ? pnlTotal : null,
+      maxConsecutiveLosses
+    };
+  }
+
+  function renderCsvStats(stats){
+    const box = $('#csvStatsBox');
+    if(!stats || stats.total===0){
+      box.innerHTML = `<div class="csv-stats-row"><div class="csv-stat">Arquivo lido (${stats?stats.totalRows:0} linhas), mas não encontrei colunas de resultado (Gain/Loss) reconhecíveis.</div></div>`;
+      return;
+    }
+    box.innerHTML = `
+      <div class="csv-stats-row">
+        <div class="csv-stat">Operações: <b>${stats.total}</b></div>
+        <div class="csv-stat">Gains: <b>${stats.gains}</b></div>
+        <div class="csv-stat">Losses: <b>${stats.losses}</b></div>
+        <div class="csv-stat">Taxa de acerto: <b>${stats.winrate}%</b></div>
+        ${stats.pnlTotal!==null ? `<div class="csv-stat">Resultado somado: <b>${stats.pnlTotal.toFixed(2)}</b></div>` : ''}
+        <div class="csv-stat">Máx. perdas seguidas: <b>${stats.maxConsecutiveLosses}</b></div>
+      </div>
+    `;
+  }
+
+  // ---------- geração de insights (regras de palavras-chave + CSV) ----------
+  const KEYWORD_RULES = [
+    { keys:['vingança','revanche','entrei de novo com raiva','recuperar o prejuízo na hora','entrei pra recuperar'], type:'bad', text:'Sinais de revenge trading (operar por raiva/vingança após uma perda). Isso costuma piorar o resultado — dê um tempo antes de entrar de novo depois de um Loss.' },
+    { keys:['sem stop','furei o stop','estourei o stop','sem gerenciamento','sem gerenciar risco','aumentei o lote depois da perda','dobrei a aposta'], type:'bad', text:'Relato de operação fora do gerenciamento de risco. Reforce o hábito de definir o stop antes de entrar.' },
+    { keys:['ansioso','ansiedade','nervoso','nervosismo','tremendo','coração acelerado'], type:'warn', text:'Sinais de ansiedade durante o dia. Vale observar se isso influenciou suas entradas ou saídas.' },
+    { keys:['euforia','eufórico','eufórica','operei demais','muitas operações','overtrade','não parava de operar'], type:'warn', text:'Indícios de euforia ou excesso de operações (overtrading). Definir um limite diário de trades pode ajudar.' },
+    { keys:['cansado','cansaço','exausto','sem dormir','dormi pouco'], type:'warn', text:'Fadiga relatada no dia. Decisões sob cansaço tendem a ser piores — considere não operar em dias assim.' },
+    { keys:['medo','com medo','travei','fiquei paralisado'], type:'warn', text:'Sinais de medo ou hesitação. Revise se veio de um setup ruim ou de insegurança no plano.' },
+    { keys:['confiante','tranquilo','disciplinado','segui o plano','segui o gerenciamento','fiquei calmo'], type:'good', text:'Bom indício de disciplina e controle emocional relatado no dia.' },
+    { keys:['saí no alvo','bateu o alvo','respeitei o alvo'], type:'good', text:'Você relatou ter respeitado o alvo definido — ótimo sinal de execução do plano.' }
+  ];
+
+  function analyzeKeywords(text){
+    const lower = (text||'').toLowerCase();
+    const hits = [];
+    KEYWORD_RULES.forEach(rule=>{
+      if(rule.keys.some(k=>lower.includes(k))) hits.push({type:rule.type, text:rule.text});
+    });
+    return hits;
+  }
+
+  let lastReviewInsights = [];
+  let lastReviewTranscript = '';
+
+  $('#generateReviewBtn').addEventListener('click', ()=>{
+    const transcript = dayTranscriptEl.value.trim();
+    const combinedText = (transcript + ' ' + ocrExtractedText).trim();
+
+    let insights = [];
+    if(!combinedText && !csvStatsData){
+      insights.push({type:'warn', text:'Fale sobre o seu dia, anexe um print ou importe um CSV para gerar a análise.'});
+    }
+    insights = insights.concat(analyzeKeywords(combinedText));
+
+    if(csvStatsData && csvStatsData.total > 0){
+      if(csvStatsData.winrate !== null){
+        if(csvStatsData.winrate < 40){
+          insights.push({type:'bad', text:`Taxa de acerto baixa no CSV importado (${csvStatsData.winrate}%). Revise os critérios de entrada.`});
+        } else if(csvStatsData.winrate >= 60){
+          insights.push({type:'good', text:`Boa taxa de acerto no CSV importado (${csvStatsData.winrate}%).`});
+        }
+      }
+      if(csvStatsData.maxConsecutiveLosses >= 3){
+        insights.push({type:'bad', text:`Sequência de ${csvStatsData.maxConsecutiveLosses} perdas seguidas identificada no CSV. Considere pausar após 2 losses consecutivos.`});
+      }
+      if(csvStatsData.pnlTotal !== null && csvStatsData.pnlTotal < 0){
+        insights.push({type:'bad', text:'Resultado financeiro somado do CSV foi negativo neste período.'});
+      }
+    }
+
+    if(insights.length===0){
+      insights.push({type:'good', text:'Nenhum padrão de risco identificado no relato. Continue registrando para acompanhar sua evolução.'});
+    }
+
+    $('#reviewInsightsBox').innerHTML = insights.map(i=>`<div class="insight ${i.type}">${iconFor(i.type)} ${i.text}</div>`).join('');
+    $('#reviewResultPanel').style.display = 'block';
+    $('#reviewResultPanel').scrollIntoView({behavior:'smooth', block:'nearest'});
+
+    lastReviewInsights = insights;
+    lastReviewTranscript = transcript;
+  });
+
+  $('#saveReviewBtn').addEventListener('click', ()=>{
+    const review = {
+      id: Date.now(),
+      data: new Date().toISOString(),
+      transcript: lastReviewTranscript || '',
+      ocrText: ocrExtractedText || '',
+      image: reviewImageData || null,
+      csvStats: csvStatsData || null,
+      insights: lastReviewInsights || []
+    };
+    const reviews = loadReviews();
+    reviews.unshift(review);
+    saveReviews(reviews);
+    alert('Revisão do dia salva.');
+    resetReviewForm();
+    renderReviewList();
+  });
+
+  function resetReviewForm(){
+    dayTranscriptEl.value = '';
+    reviewImageData = null; ocrExtractedText=''; csvStatsData=null;
+    ocrStatusEl.textContent = '';
+    $('#csvStatsBox').innerHTML = '';
+    renderReviewImgPreview();
+    $('#reviewResultPanel').style.display = 'none';
+  }
+
+  function loadReviews(){
+    try{ return JSON.parse(localStorage.getItem('trading_journal_reviews_v1')) || []; }catch(e){ return []; }
+  }
+  function saveReviews(reviews){
+    try{ localStorage.setItem('trading_journal_reviews_v1', JSON.stringify(reviews)); }
+    catch(e){ alert('Não foi possível salvar a revisão (armazenamento cheio).'); }
+  }
+
+  function renderReviewList(){
+    const reviews = loadReviews();
+    const list = $('#reviewHistoryList');
+    if(reviews.length===0){
+      list.innerHTML = `<div class="empty-state">Nenhuma revisão salva ainda.</div>`;
+      return;
+    }
+    list.innerHTML = reviews.map(r=>{
+      const date = new Date(r.data);
+      const dateStr = date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      const insightsHtml = (r.insights||[]).map(i=>`<div class="insight ${i.type}">${iconFor(i.type)} ${i.text}</div>`).join('');
+      return `
+        <div class="review-card">
+          <div class="trade-head">
+            <div class="trade-date">${dateStr}</div>
+            <button class="del-btn" data-id="${r.id}" title="Excluir">✕</button>
+          </div>
+          ${r.transcript ? `<div class="trade-feel">"${escapeHtml(r.transcript)}"</div>` : ''}
+          ${r.csvStats && r.csvStats.total>0 ? `<div class="csv-stats-row"><div class="csv-stat">Operações: <b>${r.csvStats.total}</b></div><div class="csv-stat">Acerto: <b>${r.csvStats.winrate}%</b></div></div>` : ''}
+          ${r.image ? `<img src="${r.image}" alt="print do dia" style="width:100%;border-radius:10px;margin-top:8px;">` : ''}
+          <div style="margin-top:10px;">${insightsHtml}</div>
+        </div>
+      `;
+    }).join('');
+
+    $all('.del-btn', list).forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        if(!confirm('Excluir esta revisão?')) return;
+        const id = Number(btn.dataset.id);
+        const remaining = loadReviews().filter(r=>r.id!==id);
+        saveReviews(remaining);
+        renderReviewList();
+      });
+    });
+  }
+
+  renderReviewImgPreview();
+
   // ---------- init ----------
   updateConfluenceNote();
   renderUploadPreview();
   updateGate();
+  renderHistory();
+  renderAnalysis();
+  renderReviewList();
 })();
 </script>
 </body>
